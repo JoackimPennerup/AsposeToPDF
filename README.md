@@ -10,6 +10,8 @@ mvn -DskipTests package
 
 Detta skapar både en körbar JAR (`target/asposetopdf-1.0.0-jar-with-dependencies.jar`) och förbereder underlaget för jpackage.
 
+> **Tips:** Aspose publicerar sina beroenden i det öppna Maven-arkivet som beskrivs på <https://releases.aspose.com/total/java/>. `pom.xml` är redan konfigurerad att använda repositoryt `https://releases.aspose.com/java/repo/`, så du behöver inga licensuppgifter för att hämta biblioteken.
+
 ## Köra från JAR
 
 ```bash
