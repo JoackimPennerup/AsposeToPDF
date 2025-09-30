@@ -1,6 +1,7 @@
 package com.example.asposetopdf.converters;
 
 import com.aspose.imaging.Image;
+import com.aspose.imaging.RasterImage;
 import com.aspose.pdf.Document;
 import com.aspose.pdf.MarginInfo;
 import com.aspose.pdf.Matrix;
@@ -37,6 +38,16 @@ public class ImageConverter extends BaseConverter {
     public void convert(Path input, Path output) throws Exception {
         ensureParentDirectory(output);
         try (Image imageInfo = Image.load(input.toString())) {
+            int pixelWidth = imageInfo.getWidth();
+            int pixelHeight = imageInfo.getHeight();
+            double horizontalDpi = FALLBACK_DPI;
+            double verticalDpi = FALLBACK_DPI;
+
+            if (imageInfo instanceof RasterImage raster) {
+                horizontalDpi = raster.getHorizontalResolution();
+                verticalDpi = raster.getVerticalResolution();
+            }
+
             Document document = new Document();
             try {
                 MarginInfo margin = new MarginInfo(0, 0, 0, 0);
@@ -44,11 +55,10 @@ public class ImageConverter extends BaseConverter {
 
                 Page page = document.getPages().add();
                 page.getPageInfo().setMargin(margin);
-                setPageDimensions(page, imageInfo.getWidth(), imageInfo.getHeight(),
-                        imageInfo.getHorizontalResolution(), imageInfo.getVerticalResolution());
+                setPageDimensions(page, pixelWidth, pixelHeight, horizontalDpi, verticalDpi);
 
-                double widthPoints = toPoints(imageInfo.getWidth(), imageInfo.getHorizontalResolution());
-                double heightPoints = toPoints(imageInfo.getHeight(), imageInfo.getVerticalResolution());
+                double widthPoints = toPoints(pixelWidth, horizontalDpi);
+                double heightPoints = toPoints(pixelHeight, verticalDpi);
                 embedImage(page, input, widthPoints, heightPoints);
 
                 document.save(output.toString());
