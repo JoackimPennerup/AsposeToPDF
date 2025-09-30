@@ -3,7 +3,15 @@ package com.example.asposetopdf.converters;
 import com.aspose.imaging.Image;
 import com.aspose.pdf.Document;
 import com.aspose.pdf.MarginInfo;
+import com.aspose.pdf.Matrix;
 import com.aspose.pdf.Page;
+import com.aspose.pdf.Rectangle;
+import com.aspose.pdf.XImage;
+import com.aspose.pdf.XImageCollection;
+import com.aspose.pdf.operators.ConcatenateMatrix;
+import com.aspose.pdf.operators.Do;
+import com.aspose.pdf.operators.GRestore;
+import com.aspose.pdf.operators.GSave;
 import com.example.asposetopdf.detect.FileType;
 
 import java.nio.file.Path;
@@ -39,12 +47,9 @@ public class ImageConverter extends BaseConverter {
                 setPageDimensions(page, imageInfo.getWidth(), imageInfo.getHeight(),
                         imageInfo.getHorizontalResolution(), imageInfo.getVerticalResolution());
 
-                com.aspose.pdf.Image pdfImage = new com.aspose.pdf.Image();
-                pdfImage.setFile(input.toString());
-                pdfImage.setFixWidth(page.getPageInfo().getWidth());
-                pdfImage.setFixHeight(page.getPageInfo().getHeight());
-                pdfImage.setIsApplyResolution(true);
-                page.getParagraphs().add(pdfImage);
+                double widthPoints = toPoints(imageInfo.getWidth(), imageInfo.getHorizontalResolution());
+                double heightPoints = toPoints(imageInfo.getHeight(), imageInfo.getVerticalResolution());
+                embedImage(page, input, widthPoints, heightPoints);
 
                 document.save(output.toString());
             } finally {
@@ -58,6 +63,32 @@ public class ImageConverter extends BaseConverter {
         double heightPoints = toPoints(pixelHeight, verticalDpi);
         page.getPageInfo().setWidth(widthPoints);
         page.getPageInfo().setHeight(heightPoints);
+        Rectangle crop = new Rectangle(0, 0, widthPoints, heightPoints);
+        page.setCropBox(crop);
+        page.setMediaBox(crop);
+        page.setTrimBox(crop);
+        page.setBleedBox(crop);
+        page.setArtBox(crop);
+    }
+
+    protected void embedImage(Page page, Path input, double widthPoints, double heightPoints) {
+        com.aspose.pdf.Image pdfImage = new com.aspose.pdf.Image();
+        pdfImage.setFile(input.toString());
+        pdfImage.setFixWidth(widthPoints);
+        pdfImage.setFixHeight(heightPoints);
+        pdfImage.setIsApplyResolution(true);
+        page.getParagraphs().add(pdfImage);
+    }
+
+    protected void embedNativeImage(Page page, Path input, double widthPoints, double heightPoints) {
+        XImageCollection images = page.getResources().getImages();
+        XImage xImage = images.add(input.toString());
+
+        page.getContents().add(new GSave());
+        Matrix matrix = new Matrix(new double[]{widthPoints, 0, 0, heightPoints, 0, 0});
+        page.getContents().add(new ConcatenateMatrix(matrix));
+        page.getContents().add(new Do(xImage.getName()));
+        page.getContents().add(new GRestore());
     }
 
     private double toPoints(int pixels, double dpi) {
