@@ -1,7 +1,6 @@
 package com.example.asposetopdf.converters;
 
-import com.aspose.words.Document;
-import com.aspose.words.SaveFormat;
+import com.aspose.words.*;
 import com.example.asposetopdf.detect.FileType;
 
 import java.nio.file.Path;
@@ -19,6 +18,20 @@ public class DocxConverter extends BaseConverter {
     public void convert(Path input, Path output) throws Exception {
         ensureParentDirectory(output);
         Document document = new Document(input.toString());
-        document.save(output.toString(), SaveFormat.PDF);
+        PdfSaveOptions pdfOptions = new PdfSaveOptions();
+        pdfOptions.setExportDocumentStructure(true);
+        pdfOptions.setDisplayDocTitle(true);
+        pdfOptions.setExportLanguageToSpanTag(true);
+        pdfOptions.setExportParagraphGraphicsToArtifact(true);
+        pdfOptions.setPageMode(PdfPageMode.USE_OUTLINES);
+
+        OutlineOptions outline = pdfOptions.getOutlineOptions();
+        outline.setDefaultBookmarksOutlineLevel(1);
+        outline.setHeadingsOutlineLevels(3);
+        document.save(output.toString(), pdfOptions);
     }
 }
+
+
+
+

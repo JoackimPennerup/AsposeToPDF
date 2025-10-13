@@ -22,7 +22,8 @@ public class VisioConverter extends BaseConverter {
         try {
             diagram.save(output.toString(), SaveFileFormat.PDF);
         } finally {
-            diagram.close();
+            diagram.dispose();
         }
     }
 }
+
