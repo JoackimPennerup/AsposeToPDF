@@ -2,10 +2,8 @@ package com.example.asposetopdf.converters;
 
 import com.aspose.email.MailMessage;
 import com.aspose.email.SaveOptions;
-import com.aspose.words.Document;
-import com.aspose.words.LoadFormat;
-import com.aspose.words.LoadOptions;
-import com.aspose.words.SaveFormat;
+import com.aspose.html.converters.Converter;
+import com.aspose.html.saving.PdfSaveOptions;
 import com.example.asposetopdf.detect.FileType;
 
 import java.io.ByteArrayInputStream;
@@ -24,12 +22,13 @@ public class EmlConverter extends BaseConverter {
     @Override
     public void convert(Path input, Path output) throws Exception {
         ensureParentDirectory(output);
-        MailMessage message = MailMessage.load(input.toString());
-        try (ByteArrayOutputStream mhtmlStream = new ByteArrayOutputStream()) {
-            message.save(mhtmlStream, SaveOptions.getDefaultMhtml());
-            Document document = new Document(new ByteArrayInputStream(mhtmlStream.toByteArray()),
-                new LoadOptions(LoadFormat.MHTML));
-            document.save(output.toString(), SaveFormat.PDF);
+        try (MailMessage mailMessage = MailMessage.load(input.toString());
+             ByteArrayOutputStream mhtmlStream = new ByteArrayOutputStream()) {
+            mailMessage.save(mhtmlStream, SaveOptions.getDefaultMhtml());
+            byte[] mhtmlBytes = mhtmlStream.toByteArray();
+            try (ByteArrayInputStream mhtmlInput = new ByteArrayInputStream(mhtmlBytes)) {
+                Converter.convertMHTML(mhtmlInput, new PdfSaveOptions(), output.toString());
+            }
         }
     }
 }

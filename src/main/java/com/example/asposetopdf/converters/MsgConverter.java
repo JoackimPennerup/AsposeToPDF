@@ -4,10 +4,8 @@ import com.aspose.email.MailConversionOptions;
 import com.aspose.email.MailMessage;
 import com.aspose.email.MapiMessage;
 import com.aspose.email.SaveOptions;
-import com.aspose.words.Document;
-import com.aspose.words.LoadFormat;
-import com.aspose.words.LoadOptions;
-import com.aspose.words.SaveFormat;
+import com.aspose.html.converters.Converter;
+import com.aspose.html.saving.PdfSaveOptions;
 import com.example.asposetopdf.detect.FileType;
 
 import java.io.ByteArrayInputStream;
@@ -26,13 +24,15 @@ public class MsgConverter extends BaseConverter {
     @Override
     public void convert(Path input, Path output) throws Exception {
         ensureParentDirectory(output);
-        MapiMessage mapiMessage = MapiMessage.load(input.toString());
-        MailMessage mailMessage = mapiMessage.toMailMessage(new MailConversionOptions());
-        try (ByteArrayOutputStream mhtmlStream = new ByteArrayOutputStream()) {
+        try (MapiMessage mapiMessage = MapiMessage.load(input.toString());
+             MailMessage mailMessage = mapiMessage.toMailMessage(new MailConversionOptions());
+             ByteArrayOutputStream mhtmlStream = new ByteArrayOutputStream()) {
             mailMessage.save(mhtmlStream, SaveOptions.getDefaultMhtml());
-            Document document = new Document(new ByteArrayInputStream(mhtmlStream.toByteArray()),
-                new LoadOptions(LoadFormat.MHTML));
-            document.save(output.toString(), SaveFormat.PDF);
+            byte[] mhtmlBytes = mhtmlStream.toByteArray();
+            try (ByteArrayInputStream mhtmlInput = new ByteArrayInputStream(mhtmlBytes)) {
+                Converter.convertMHTML(mhtmlInput, new PdfSaveOptions(), output.toString());
+            }
         }
     }
 }
+
