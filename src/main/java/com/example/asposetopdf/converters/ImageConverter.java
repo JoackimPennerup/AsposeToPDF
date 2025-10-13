@@ -7,7 +7,7 @@ import com.aspose.pdf.MarginInfo;
 import com.aspose.pdf.Matrix;
 import com.aspose.pdf.Page;
 import com.aspose.pdf.Rectangle;
-import com.aspose.pdf.XImage;
+import com.aspose.pdf.ImageFilterType;
 import com.aspose.pdf.XImageCollection;
 import com.aspose.pdf.operators.ConcatenateMatrix;
 import com.aspose.pdf.operators.Do;
@@ -15,6 +15,9 @@ import com.aspose.pdf.operators.GRestore;
 import com.aspose.pdf.operators.GSave;
 import com.example.asposetopdf.detect.FileType;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -82,23 +85,35 @@ public class ImageConverter extends BaseConverter {
     }
 
     protected void embedImage(Page page, Path input, double widthPoints, double heightPoints) {
-        com.aspose.pdf.Image pdfImage = new com.aspose.pdf.Image();
-        pdfImage.setFile(input.toString());
-        pdfImage.setFixWidth(widthPoints);
-        pdfImage.setFixHeight(heightPoints);
-        pdfImage.setIsApplyResolution(true);
-        page.getParagraphs().add(pdfImage);
+        try {
+            byte[] imageData = Files.readAllBytes(input);
+            embedImage(page, imageData, widthPoints, heightPoints, getDefaultImageFilter());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to embed image " + input, e);
+        }
     }
 
-    protected void embedNativeImage(Page page, Path input, double widthPoints, double heightPoints) {
-        XImageCollection images = page.getResources().getImages();
-        XImage xImage = images.add(input.toString());
+    protected void embedImage(Page page, byte[] imageData, double widthPoints, double heightPoints) {
+        embedImage(page, imageData, widthPoints, heightPoints, getDefaultImageFilter());
+    }
 
-        page.getContents().add(new GSave());
-        Matrix matrix = new Matrix(new double[]{widthPoints, 0, 0, heightPoints, 0, 0});
-        page.getContents().add(new ConcatenateMatrix(matrix));
-        page.getContents().add(new Do(xImage.getName()));
-        page.getContents().add(new GRestore());
+    protected void embedImage(Page page, byte[] imageData, double widthPoints, double heightPoints, int filterType) {
+        XImageCollection images = page.getResources().getImages();
+        try (ByteArrayInputStream imageStream = new ByteArrayInputStream(imageData)) {
+            String imageName = images.addWithImageFilterType(imageStream, filterType);
+
+            page.getContents().add(new GSave());
+            Matrix matrix = new Matrix(new double[]{widthPoints, 0, 0, heightPoints, 0, 0});
+            page.getContents().add(new ConcatenateMatrix(matrix));
+            page.getContents().add(new Do(imageName));
+            page.getContents().add(new GRestore());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to embed image with filter " + filterType, e);
+        }
+    }
+
+    protected int getDefaultImageFilter() {
+        return ImageFilterType.Flate;
     }
 
     private double toPoints(int pixels, double dpi) {
