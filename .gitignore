@@ -3,3 +3,9 @@ target/
 *.iml
 .idea/
 .DS_Store
+*.xls*
+*.doc*
+*.pdf
+*.dwg
+*.png
+*.jpg
