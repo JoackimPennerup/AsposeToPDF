@@ -1,38 +1,38 @@
 # AsposeToPDF
 
-Ett enkelt kommandoradsverktyg för att konvertera olika dokumentformat till PDF med hjälp av Aspose Total for Java.
+A simple command-line tool for converting various document formats to PDF using Aspose Total for Java.
 
-## Bygga
+## Build
 
 ```bash
 mvn -DskipTests package
 ```
 
-Detta skapar både en körbar JAR (`target/asposetopdf-1.0.0-jar-with-dependencies.jar`) och förbereder underlaget för jpackage.
+This creates both an executable JAR (`target/asposetopdf-1.0.0-jar-with-dependencies.jar`) and prepares the artifacts for jpackage.
 
-> **Tips:** Aspose publicerar sina beroenden i det öppna Maven-arkivet som beskrivs på <https://releases.aspose.com/total/java/>. `pom.xml` är redan konfigurerad att använda repositoryt `https://releases.aspose.com/java/repo/`, så du behöver inga licensuppgifter för att hämta biblioteken.
+> **Tip:** Aspose publishes its dependencies in the public Maven repository described at <https://releases.aspose.com/total/java/>. `pom.xml` is already configured to use the repository `https://releases.aspose.com/java/repo/`, so you do not need any license information to download the libraries.
 
-## Köra från JAR
+## Run from JAR
 
 ```bash
-java -jar target/asposetopdf-1.0.0-jar-with-dependencies.jar <indatafil> [utdatafil]
+java -jar target/asposetopdf-1.0.0-jar-with-dependencies.jar <inputFile> [outputFile]
 ```
 
-Om `utdatafil` inte anges skapas en PDF med samma namn som indatafilen men med ändelsen `.pdf`.
+If `outputFile` is not provided, a PDF with the same name as the input file but with the `.pdf` extension is created.
 
-## Paketera med jpackage
+## Package with jpackage
 
-För att skapa en plattformsanpassad app-image (som kan köras utan installerad JRE) används jpackage via Maven:
+To create a platform-specific app image (which can run without an installed JRE), use jpackage via Maven:
 
 ```bash
 mvn -DskipTests package jpackage:jpackage
 ```
 
-Detta producerar en app-image under `target/installer/AsposeToPdf`. Kopiera katalogen till målmaskinen och kör startskriptet inuti.
+This produces an app image under `target/installer/AsposeToPdf`. Copy the directory to the target machine and run the startup script inside it.
 
-> **Obs!** jpackage kräver ett JDK (17 eller senare) med jpackage-kommandot installerat på byggmaskinen.
+> **Note:** jpackage requires a JDK (17 or later) with the jpackage command available on the build machine.
 
-## Stödda format
+## Supported formats
 
 * PDF
 * JPG/JPEG
@@ -44,10 +44,10 @@ Detta producerar en app-image under `target/installer/AsposeToPdf`. Kopiera kata
 * EML
 * MSG
 * Visio (VSDX)
-* DWG (Model-layouten exporteras som standard och eventuella papperslayouter identifieras automatiskt)
+* DWG (the model layout is exported by default and any paper layouts are detected automatically)
 
-Filtypen bestäms i första hand via filens magiska bytes. Om typen inte kan avgöras på detta sätt används filändelsen som reserv.
+The file type is determined primarily via the file's magic bytes. If the type cannot be determined in this way, the file extension is used as a fallback.
 
-## Aspose-licens
+## Aspose license
 
-Om du har en Aspose Total-licens kan den aktiveras genom att sätta miljövariabeln `ASPOSE_LICENSE_PATH` till sökvägen av licensfilen innan programmet startas.
+If you have an Aspose Total license, it can be activated by setting the environment variable `ASPOSE_LICENSE_PATH` to the path of the license file before starting the program.
