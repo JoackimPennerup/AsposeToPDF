@@ -1,6 +1,7 @@
 package com.example.asposetopdf.converters;
 
 import com.aspose.cad.Image;
+import com.aspose.cad.fileformats.cad.CadDrawTypeMode;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.PdfOptions;
 import com.example.asposetopdf.detect.FileType;
@@ -28,6 +29,7 @@ public class DwgConverter extends BaseConverter {
             CadRasterizationOptions rasterization = new CadRasterizationOptions();
             rasterization.setAutomaticLayoutsScaling(true);
             rasterization.setNoScaling(false);
+            rasterization.setDrawType(CadDrawTypeMode.UseObjectColor);
 
             String[] layouts = determineLayouts(image);
             if (layouts.length > 0) {

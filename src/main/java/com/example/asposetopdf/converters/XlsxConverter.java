@@ -67,11 +67,18 @@ public class XlsxConverter extends BaseConverter {
 
 
     private void sanitizeCharts(Workbook workbook) {
-        for (Worksheet sheet : workbook.getWorksheets()) {
-            for (Chart chart : sheet.getCharts()) {
+        WorksheetCollection worksheets = workbook.getWorksheets();
+        for (int sheetIndex = 0; sheetIndex < worksheets.getCount(); sheetIndex++) {
+            Worksheet sheet = worksheets.get(sheetIndex);
+            ChartCollection charts = sheet.getCharts();
+            for (int chartIndex = 0; chartIndex < charts.getCount(); chartIndex++) {
+                Chart chart = charts.get(chartIndex);
                 if (chart.getType() == ChartType.LINE_WITH_DATA_MARKERS && chart.getValueAxis() != null) {
-                    chart.getValueAxis().setNumberFormatLinked(false);
-                    chart.getValueAxis().setNumberFormat("0.00E+00");
+                    TickLabels labels = chart.getValueAxis().getTickLabels();
+                    if (labels != null) {
+                        labels.setNumberFormatLinked(false);
+                        labels.setNumberFormat("0.00E+00");
+                    }
                 }
             }
         }
